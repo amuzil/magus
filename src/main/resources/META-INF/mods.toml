@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[44,)"
+license = "The Unlicense <https://unlicense.org>"
+issueTrackerURL = "https://github.com/amuzil/magus/issues"
+
+[[mods]]
+modId = "magus"
+version = "0.0.1-alpha1"
+displayName = "Magus"
+# A URL to query for updates for this mod. See the JSON update specification <here>
+#updateJSONURL="http://myurl.me/" #optional
+displayURL = "https://docs.amuzil.com/magus/"
+# A file name (in the root of the mod JAR) containing a logo for display
+#logoFile="magus.png" #optional
+#credits="Thanks for this example mod goes to Java" #optional
+authors = "Mahtaran & the Amuzil community"
+displayTest = "MATCH_VERSION"
+description = """\
+A library for creating Minecraft mods with \
+complex skill trees and immersive new dimensions, \
+written in Kotlin.\
+"""
+
+[[dependencies.magus]]
+modId = "forge"
+mandatory = true
+versionRange = "[44.1.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.magus]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19.3,1.20)"
+ordering = "NONE"
+side = "BOTH"
