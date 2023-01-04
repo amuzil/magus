@@ -15,7 +15,7 @@ displayURL = "https://docs.amuzil.com/magus/"
 #credits="Thanks for this example mod goes to Java" #optional
 authors = "Mahtaran & the Amuzil community"
 displayTest = "MATCH_VERSION"
-description = """\
+description = """
 A library for creating Minecraft mods with \
 complex skill trees and immersive new dimensions, \
 written in Kotlin.\
