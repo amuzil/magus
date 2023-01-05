@@ -3,6 +3,8 @@
  * Any copyright is dedicated to the Public Domain.
  * <https://unlicense.org>
  */
+import java.net.URL
+
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
@@ -48,3 +50,27 @@ buildscript {
 val projectName: String by settings
 
 rootProject.name = projectName
+
+plugins { id("org.danilopianini.gradle-pre-commit-git-hooks") version "[1.1.1,2)" }
+
+gitHooks {
+	preCommit {
+		from {
+			"""
+			./gradlew check
+			"""
+				.trimIndent()
+		}
+	}
+
+	commitMsg {
+		from {
+			URL(
+					"https://gist.githubusercontent.com/mahtaran/b202b92a26fdd52c78197e7373cb3a91/raw/amuzil-commit-msg-git-hook.sh"
+				)
+				.readText()
+		}
+	}
+
+	createHooks(true)
+}
