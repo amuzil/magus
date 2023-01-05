@@ -407,8 +407,7 @@ val changelog by
 		val command =
 			listOf(
 				// spotless:off
-                "pnpx",
-                "gitmoji-changelog",
+                "pnpx", "gitmoji-changelog",
                 "--format", "markdown",
                 "--preset", "generic",
                 "--output", "changelog.md",
@@ -424,6 +423,8 @@ val changelog by
 				else -> throw IllegalStateException("Unsupported operating system: $this")
 			}
 		}
+
+		finalizedBy("spotlessMarkdownApply")
 	}
 
 val format =
