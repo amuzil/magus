@@ -4,6 +4,7 @@
 # Gradle
 .gradle
 build/
+.gitmoji-changelogrc
 
 # Common working directory
 run/

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /* CONFIG */
@@ -134,7 +135,9 @@ plugins {
 /* PROJECT INFORMATION */
 
 group = modGroup
+
 description = modConfig.description
+
 version = "${minecraftVersion}-${modConfig.version}"
 
 /* DEPENDENCIES */
@@ -174,27 +177,27 @@ spotless {
 			.readText()
 			.replace("\$AUTHORS", modConfig.authors ?: throw Exception("Missing authors"))
 
-    ratchetFrom("origin/main")
+	ratchetFrom("origin/main")
 
 	kotlin {
 		ktfmt().kotlinlangStyle()
 		indentWithTabs(4)
 		licenseHeader(licenseHeaderKt)
-        toggleOffOn()
+		toggleOffOn()
 	}
 
 	kotlinGradle {
 		ktfmt().kotlinlangStyle()
 		indentWithTabs(4)
 		licenseHeader(licenseHeaderKt, "(pluginManagement |import )")
-        toggleOffOn()
+		toggleOffOn()
 	}
 
 	java {
 		palantirJavaFormat()
 		indentWithTabs(4)
 		licenseHeader(licenseHeaderKt)
-        toggleOffOn()
+		toggleOffOn()
 	}
 
 	json {
@@ -295,13 +298,15 @@ minecraft {
 			)
 
 			args(
-				"--mod",
-				modConfig.modId,
-				"--all",
-				"--output",
-				file("src/generated/resources"),
-				"--existing",
-				file("src/main/resources")
+				// spotless:off
+                "--mod",
+                modConfig.modId,
+                "--all",
+                "--output",
+                file("src/generated/resources"),
+                "--existing",
+                file("src/main/resources")
+                // spotless:on
 			)
 
 			mods { create(modConfig.modId) { source(sourceSets.main.get()) } }
@@ -382,48 +387,52 @@ reobf.create("jarJar")
 
 tasks.build { dependsOn(tasks.jarJar) }
 
-val changelog by tasks.registering(Task::class) {
-    group = "changelog"
-    description = "Generates a changelog for the current version"
+val changelog by
+	tasks.registering(Exec::class) {
+		group = "changelog"
+		description = "Generates a changelog for the current version. Requires PNPM"
 
-    // First, build the .gitmoji-changelogrc file
-    // JSON with structure
-    /*
-    project:
-        name,
-        description,
-        version
-     */
-    val gitmojiChangelogRc = File(project.buildDir, ".gitmoji-changelogrc")
-    val mapper = ObjectMapper()
-    val value = mapOf(
-        "project" to mapOf(
-            "name" to modConfig.displayName,
-            "description" to modConfig.description,
-            "version" to project.version
-        )
-    )
-    mapper.writeValue(gitmojiChangelogRc, value)
+		workingDir = project.rootDir
 
-    doLast {
-        val command = """
-            pnpx gitmoji-changelog
-            --format markdown
-            --preset generic
-            --output changelog.md
-            --group-similar-commits
-            --author
-        """.trimIndent().replace("\n", " ")
-        val process = Runtime.getRuntime().exec(command)
-        val exitCode = process.waitFor()
-        if (exitCode != 0) {
-            throw GradleException("""
-                gitmoji-changelog failed with exit code ${exitCode}!
-                Do you have `pnpm` installed?
-                """.trimIndent().replace("\n", " "))
-        }
-    }
-}
+		ObjectMapper()
+			.writeValue(
+				file(".gitmoji-changelogrc"),
+				mapOf(
+					"project" to
+						mapOf(
+							"name" to modConfig.displayName,
+							"description" to modConfig.description,
+							"version" to project.version
+						)
+				)
+			)
+
+		val command =
+			listOf(
+				// spotless:off
+                "pnpx",
+                "gitmoji-changelog",
+                "--format",
+                "markdown",
+                "--preset",
+                "generic",
+                "--output",
+                "changelog.md",
+                "--group-similar-commits",
+                "true",
+                "--author",
+                "true"
+                // spotless:on
+			)
+
+		with(OperatingSystem.current()) {
+			when {
+				isWindows -> commandLine(listOf("cmd", "/c") + command)
+				isLinux -> commandLine(command)
+				else -> throw IllegalStateException("Unsupported operating system: $this")
+			}
+		}
+	}
 
 val format =
 	tasks.create("format") {
@@ -456,10 +465,6 @@ val javadocJar by
 	}
 
 tasks.build {
-	// Run format before check
-	dependsOn(format)
-	dependsOn(tasks.check).mustRunAfter(format)
-
 	dependsOn(tasks.kotlinSourcesJar)
 	dependsOn(dokkaJar)
 	dependsOn(javadocJar)
