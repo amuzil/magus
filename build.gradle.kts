@@ -299,13 +299,10 @@ minecraft {
 
 			args(
 				// spotless:off
-                "--mod",
-                modConfig.modId,
                 "--all",
-                "--output",
-                file("src/generated/resources"),
-                "--existing",
-                file("src/main/resources")
+                "--mod", modConfig.modId,
+                "--output", file("src/generated/resources"),
+                "--existing", file("src/main/resources")
                 // spotless:on
 			)
 
@@ -412,16 +409,11 @@ val changelog by
 				// spotless:off
                 "pnpx",
                 "gitmoji-changelog",
-                "--format",
-                "markdown",
-                "--preset",
-                "generic",
-                "--output",
-                "changelog.md",
-                "--group-similar-commits",
-                "true",
-                "--author",
-                "true"
+                "--format", "markdown",
+                "--preset", "generic",
+                "--output", "changelog.md",
+                "--group-similar-commits", "true",
+                "--author", "true"
                 // spotless:on
 			)
 
