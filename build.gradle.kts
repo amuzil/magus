@@ -465,6 +465,8 @@ tasks.build {
 
 /* PUBLISHING */
 
+tasks.publish { dependsOn(changelog) }
+
 publishing {
 	publications {
 		create<MavenPublication>("maven") {
