@@ -16,7 +16,6 @@ indent_size = 2
 
 # From https://github.com/facebook/ktfmt/blob/main/docs/editorconfig/.editorconfig-kotlinlang
 [{*.kt,*.kts}]
-indent_style = space
 max_line_length = 100
 ij_continuation_indent_size = 4
 ij_java_names_count_to_use_import_on_demand = 9999
