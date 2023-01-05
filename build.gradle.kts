@@ -82,13 +82,10 @@ data class ModsToml(
 		fun mapper() = tomlMapper {
 			decoder { it: TomlValue.String -> VersionRange(it.value) }
 			decoder { it: TomlValue.String -> URL(it.value) }
-            decoder { it: TomlValue.String ->
-                // line ending backslash
-                it.value.replace(
-                    Regex("\\\\(\\s*)"),
-                    ""
-                )
-            }
+			decoder { it: TomlValue.String ->
+				// line ending backslash
+				it.value.replace(Regex("\\\\(\\s*)"), "")
+			}
 		}
 	}
 }
