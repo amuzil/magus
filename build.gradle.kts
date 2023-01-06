@@ -91,48 +91,67 @@ data class ModsToml(
 	}
 }
 
-val config =
-	ModsToml.mapper().decode<ModsToml>(file("src/main/resources/META-INF/mods.toml").toPath())
+/* SETTINGS */
 
-// Settings from `mods.toml`
-val modConfig = config.mods[0]
-val modDependencies = config.dependencies!![modConfig.modId]!!.associateBy { it.modId }
+// `gradle.properties`
 
-val forgeVersion = modDependencies["forge"]!!.versionRange.min
-val minecraftVersion = modDependencies["minecraft"]!!.versionRange.min
-
-// Settings from `settings.gradle.kts`
+// General information
+val projectName: String by project
 val modGroup: String by project
+// POM information
 val developerId: String by project
 val developerName: String by project
 val developerEmail: String by project
 val scmConnection: String by project
 val scmUrl: String by project
-
+// Dependency versions
+// languages
 val javaVersion: String by project
 val kotlinVersion: String by project
-val mixinProcessorVersion: String by project
-val mappingsDate: String by project
+// build
+// publish
+// code quality
 val prettierVersion: String by project
 val prettierPluginTomlVersion: String by project
+// documentation
+// forge
+val mixinProcessorVersion: String by project
+// Librarian settings
+val mappingsDate: String by project
+
+// `mods.toml`
+
+val config =
+	ModsToml.mapper().decode<ModsToml>(file("src/main/resources/META-INF/mods.toml").toPath())
+val modConfig = config.mods.first { it.modId == projectName }
+val modDependencies = config.dependencies!![modConfig.modId]!!.associateBy { it.modId }
+
+val forgeVersion = modDependencies["forge"]!!.versionRange.min
+val minecraftVersion = modDependencies["minecraft"]!!.versionRange.min
 
 /* PLUGINS */
 
 plugins {
+	// languages
 	java
-	`maven-publish`
-	signing
-	id("org.jetbrains.kotlin.jvm")
-	id("com.diffplug.spotless")
+	kotlin("jvm")
+	// build
 	id("org.jetbrains.dokka")
-	id("org.barfuin.gradle.taskinfo")
 	id("co.uzzu.dotenv.gradle")
+	id("org.barfuin.gradle.taskinfo")
+	// code quality
+	id("com.diffplug.spotless")
+	// documentation
+	// forge
 	id("net.minecraftforge.gradle")
 	id("org.parchmentmc.librarian.forgegradle")
 	id("org.spongepowered.mixin")
+	// publish
+	`maven-publish`
+	signing
 }
 
-/* PROJECT INFORMATION */
+/* GENERAL INFORMATION */
 
 group = modGroup
 
@@ -160,15 +179,71 @@ dependencies {
 	)
 }
 
-/* COMPILATION */
+/* LANGUAGES */
 
 kotlin { jvmToolchain(javaVersion.toInt()) }
+
+/* BUILD */
+
+sourceSets { main { resources { srcDir("src/generated/resources") } } }
 
 tasks.withType<KotlinCompile> { kotlinOptions { jvmTarget = javaVersion } }
 
 tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
 
-/* PLUGIN CONFIGURATION */
+// FIXME the ProcessResources task is incubating and thus deprecated
+//  tasks.withType<ProcessResources> {
+tasks.processResources {
+	// Invalidate the task cache if the version changes
+	inputs.property("version", version)
+
+	filesMatching("META-INF/mods.toml") {
+		filter {
+			if (it.startsWith("version = ")) {
+				"version = \"${project.version}\""
+			} else {
+				it
+			}
+		}
+	}
+}
+
+tasks.withType<Jar> {
+	outputs.upToDateWhen { false }
+
+	archiveBaseName.set(modConfig.modId)
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	manifest {
+		attributes(
+			"Specification-Title" to modConfig.displayName,
+			"Specification-Vendor" to modConfig.authors,
+			"Specification-Version" to project.version,
+			"Implementation-Title" to modConfig.displayName,
+			"Implementation-Vendor" to modConfig.authors,
+			"Implementation-Version" to project.version,
+			"Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+		)
+	}
+}
+
+tasks.jar { finalizedBy("reobfJar") }
+
+jarJar { enable() }
+
+tasks.jarJar { archiveClassifier.set("") }
+
+reobf.create("jarJar")
+
+tasks.build {
+	dependsOn(tasks.jarJar)
+	dependsOn(tasks.kotlinSourcesJar)
+	dependsOn(dokkaJar)
+	dependsOn(javadocJar)
+}
+
+/* CODE QUALITY */
 
 spotless {
 	// Load from file and replace placeholders
@@ -237,6 +312,83 @@ spotless {
 			}
 	}
 }
+
+val format =
+	tasks.create("format") {
+		group = "verification"
+		description = "Runs the formatter on the project"
+
+		dependsOn(tasks.spotlessApply)
+	}
+
+/* DOCUMENTATION */
+
+val changelog by
+	tasks.registering(Exec::class) {
+		group = "changelog"
+		description = "Generates a changelog for the current version. Requires PNPM"
+
+		workingDir = project.rootDir
+
+		ObjectMapper()
+			.writeValue(
+				file(".gitmoji-changelogrc"),
+				mapOf(
+					"project" to
+						mapOf(
+							"name" to modConfig.displayName,
+							"description" to modConfig.description,
+							"version" to project.version
+						)
+				)
+			)
+
+		val command =
+			listOf(
+				// spotless:off
+                "pnpx", "gitmoji-changelog",
+                "--format", "markdown",
+                "--preset", "generic",
+                "--output", "changelog.md",
+                "--group-similar-commits", "true",
+                "--author", "true"
+                // spotless:on
+			)
+
+		with(OperatingSystem.current()) {
+			when {
+				isWindows -> commandLine(listOf("cmd", "/c") + command)
+				isLinux -> commandLine(command)
+				else -> throw IllegalStateException("Unsupported operating system: $this")
+			}
+		}
+
+		finalizedBy("spotlessMarkdownApply")
+	}
+
+val dokkaJar by
+	tasks.registering(Jar::class) {
+		group = "documentation"
+		description = "Generates the documentation as Dokka HTML"
+
+		dependsOn(tasks.dokkaHtml)
+		from(tasks.dokkaHtml.get().outputDirectory)
+
+		archiveClassifier.set("dokka")
+	}
+
+val javadocJar by
+	tasks.registering(Jar::class) {
+		group = "documentation"
+		description = "Generates the documentation as Javadoc HTML"
+
+		dependsOn(tasks.dokkaJavadoc)
+		from(tasks.dokkaJavadoc.get().outputDirectory)
+
+		archiveClassifier.set("javadoc")
+	}
+
+/* FORGE */
 
 minecraft {
 	mappings("parchment", "${mappingsDate}-${minecraftVersion}")
@@ -333,137 +485,7 @@ mixin {
 	config("mixins.${modConfig.modId}.json")
 }
 
-sourceSets { main { resources { srcDir("src/generated/resources") } } }
-
-/* TASKS */
-
-// FIXME the ProcessResources task is incubating and thus deprecated
-//  tasks.withType<ProcessResources> {
-tasks.processResources {
-	// Invalidate the task cache if the version changes
-	inputs.property("version", version)
-
-	filesMatching("META-INF/mods.toml") {
-		filter {
-			if (it.startsWith("version = ")) {
-				"version = \"${project.version}\""
-			} else {
-				it
-			}
-		}
-	}
-}
-
-tasks.withType<Jar> {
-	outputs.upToDateWhen { false }
-
-	archiveBaseName.set(modConfig.modId)
-
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-	manifest {
-		attributes(
-			"Specification-Title" to modConfig.displayName,
-			"Specification-Vendor" to modConfig.authors,
-			"Specification-Version" to project.version,
-			"Implementation-Title" to modConfig.displayName,
-			"Implementation-Vendor" to modConfig.authors,
-			"Implementation-Version" to project.version,
-			"Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
-		)
-	}
-}
-
-tasks.jar { finalizedBy("reobfJar") }
-
-jarJar { enable() }
-
-tasks.jarJar { archiveClassifier.set("") }
-
-reobf.create("jarJar")
-
-tasks.build { dependsOn(tasks.jarJar) }
-
-val changelog by
-	tasks.registering(Exec::class) {
-		group = "changelog"
-		description = "Generates a changelog for the current version. Requires PNPM"
-
-		workingDir = project.rootDir
-
-		ObjectMapper()
-			.writeValue(
-				file(".gitmoji-changelogrc"),
-				mapOf(
-					"project" to
-						mapOf(
-							"name" to modConfig.displayName,
-							"description" to modConfig.description,
-							"version" to project.version
-						)
-				)
-			)
-
-		val command =
-			listOf(
-				// spotless:off
-                "pnpx", "gitmoji-changelog",
-                "--format", "markdown",
-                "--preset", "generic",
-                "--output", "changelog.md",
-                "--group-similar-commits", "true",
-                "--author", "true"
-                // spotless:on
-			)
-
-		with(OperatingSystem.current()) {
-			when {
-				isWindows -> commandLine(listOf("cmd", "/c") + command)
-				isLinux -> commandLine(command)
-				else -> throw IllegalStateException("Unsupported operating system: $this")
-			}
-		}
-
-		finalizedBy("spotlessMarkdownApply")
-	}
-
-val format =
-	tasks.create("format") {
-		group = "verification"
-		description = "Runs the formatter on the project"
-
-		dependsOn(tasks.spotlessApply)
-	}
-
-val dokkaJar by
-	tasks.registering(Jar::class) {
-		group = "documentation"
-		description = "Generates the documentation as Dokka HTML"
-
-		dependsOn(tasks.dokkaHtml)
-		from(tasks.dokkaHtml.get().outputDirectory)
-
-		archiveClassifier.set("dokka")
-	}
-
-val javadocJar by
-	tasks.registering(Jar::class) {
-		group = "documentation"
-		description = "Generates the documentation as Javadoc HTML"
-
-		dependsOn(tasks.dokkaJavadoc)
-		from(tasks.dokkaJavadoc.get().outputDirectory)
-
-		archiveClassifier.set("javadoc")
-	}
-
-tasks.build {
-	dependsOn(tasks.kotlinSourcesJar)
-	dependsOn(dokkaJar)
-	dependsOn(javadocJar)
-}
-
-/* PUBLISHING */
+/* PUBLISH */
 
 tasks.publish { dependsOn(changelog) }
 

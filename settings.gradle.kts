@@ -13,20 +13,32 @@ pluginManagement {
 		maven("https://maven.parchmentmc.org")
 	}
 
+	// languages
 	val kotlinVersion: String by settings
-	val spotlessVersion: String by settings
+	// build
 	val dokkaVersion: String by settings
-	val taskinfoVersion: String by settings
 	val dotenvVersion: String by settings
+	val taskinfoVersion: String by settings
+	// code quality
+	val spotlessVersion: String by settings
+	// documentation
+	// forge
 	val forgeGradleVersion: String by settings
 	val librarianVersion: String by settings
+	// publish
 
 	plugins {
+		// languages
 		kotlin("jvm") version kotlinVersion
-		id("com.diffplug.spotless") version spotlessVersion
+		// build
 		id("org.jetbrains.dokka") version dokkaVersion
-		id("org.barfuin.gradle.taskinfo") version taskinfoVersion
 		id("co.uzzu.dotenv.gradle") version dotenvVersion
+		id("org.barfuin.gradle.taskinfo") version taskinfoVersion
+		// publish
+		// code quality
+		id("com.diffplug.spotless") version spotlessVersion
+		// documentation
+		// forge
 		id("net.minecraftforge.gradle") version forgeGradleVersion
 		id("org.parchmentmc.librarian.forgegradle") version librarianVersion
 	}
@@ -38,8 +50,14 @@ buildscript {
 		maven("https://jitpack.io")
 	}
 
-	val mixinGradleVersion: String by settings
+	// languages
+	// build
 	val komaVersion: String by settings
+	// code quality
+	// documentation
+	// forge
+	val mixinGradleVersion: String by settings
+	// publish
 
 	dependencies {
 		classpath("org.spongepowered", "mixingradle", mixinGradleVersion)
