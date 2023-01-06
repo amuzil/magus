@@ -257,6 +257,7 @@ sonarqube {
 		property("sonar.host.url", sonarHostUrl)
 
 		property("sonar.kotlin.file.suffixes", ".kt,.kts")
+
 		// Analyse all files, including Kotlin (Gradle) scripts
 		property("sonar.sources", ".")
 		property("sonar.inclusions", "src/main/**/*, src/generated/**/*, *.kts")
