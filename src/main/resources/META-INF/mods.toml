@@ -10,8 +10,7 @@ displayName = "Magus"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="http://myurl.me/" #optional
 displayURL = "https://docs.amuzil.com/magus/"
-# A file name (in the root of the mod JAR) containing a logo for display
-#logoFile="magus.png" #optional
+logoFile = "banner.png"
 #credits="Thanks for this example mod goes to Java" #optional
 authors = "Mahtaran & the Amuzil community"
 displayTest = "MATCH_VERSION"
