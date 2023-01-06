@@ -324,6 +324,20 @@ spotless {
 				config(mapOf("tabWidth" to 2, "useTabs" to false))
 			}
 	}
+
+	format("yaml") {
+		target("**/*.yml", "**/*.yaml")
+
+		prettier(
+				mapOf(
+					"prettier" to prettierVersion,
+				)
+			)
+			.apply {
+				configFile(".prettierrc")
+				config(mapOf("tabWidth" to 2, "useTabs" to false))
+			}
+	}
 }
 
 val format =
