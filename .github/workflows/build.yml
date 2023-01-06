@@ -1,0 +1,29 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Cache ForgeGradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            build/fg_cache
+          key: cache-${{ runner.os }}-forgegradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'buildSrc/**/Versions.kt', 'buildSrc/**/Dependencies.kt', 'gradle/*.versions.toml') }}
+          restore-keys: |
+            cache-${{ runner.os }}-forgegradle-
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
