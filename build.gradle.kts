@@ -116,6 +116,10 @@ val prettierPluginTomlVersion: String by project
 // documentation
 // forge
 val mixinProcessorVersion: String by project
+// SonarQube settings
+val sonarProjectKey: String by project
+val sonarOrganization: String by project
+val sonarHostUrl: String by project
 // Librarian settings
 val mappingsDate: String by project
 
@@ -140,6 +144,7 @@ plugins {
 	id("co.uzzu.dotenv.gradle")
 	id("org.barfuin.gradle.taskinfo")
 	// code quality
+	id("org.sonarqube")
 	id("com.diffplug.spotless")
 	// documentation
 	// forge
@@ -244,6 +249,14 @@ tasks.build {
 }
 
 /* CODE QUALITY */
+
+sonarqube {
+	properties {
+		property("sonar.projectKey", sonarProjectKey)
+		property("sonar.organization", sonarOrganization)
+		property("sonar.host.url", sonarHostUrl)
+	}
+}
 
 spotless {
 	// Load from file and replace placeholders

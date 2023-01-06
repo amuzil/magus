@@ -20,6 +20,7 @@ pluginManagement {
 	val dotenvVersion: String by settings
 	val taskinfoVersion: String by settings
 	// code quality
+	val sonarqubeVersion: String by settings
 	val spotlessVersion: String by settings
 	// documentation
 	// forge
@@ -36,6 +37,7 @@ pluginManagement {
 		id("org.barfuin.gradle.taskinfo") version taskinfoVersion
 		// publish
 		// code quality
+		id("org.sonarqube") version sonarqubeVersion
 		id("com.diffplug.spotless") version spotlessVersion
 		// documentation
 		// forge
