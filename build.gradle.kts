@@ -508,12 +508,14 @@ publishing {
 	}
 
 	repositories {
-		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/amuzil/magus")
-			credentials {
-				username = env.GITHUB_ACTOR.value
-				password = env.GITHUB_TOKEN.value
+		if (env.GITHUB_ACTOR.isPresent && env.GITHUB_TOKEN.isPresent) {
+			maven {
+				name = "GitHubPackages"
+				url = uri(scmUrl.replace("github.com", "maven.pkg.github.com"))
+				credentials {
+					username = env.GITHUB_ACTOR.value
+					password = env.GITHUB_TOKEN.value
+				}
 			}
 		}
 	}
