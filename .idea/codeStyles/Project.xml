@@ -62,6 +62,7 @@
       <option name="LINE_COMMENT_AT_FIRST_COLUMN" value="false" />
       <option name="LINE_COMMENT_ADD_SPACE" value="true" />
       <option name="LINE_COMMENT_ADD_SPACE_ON_REFORMAT" value="true" />
+      <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
         <option name="SMART_TABS" value="true" />
@@ -106,6 +107,7 @@
       <option name="LINE_COMMENT_ADD_SPACE" value="true" />
       <option name="BLOCK_COMMENT_ADD_SPACE" value="true" />
       <option name="LINE_COMMENT_ADD_SPACE_ON_REFORMAT" value="true" />
+      <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
         <option name="SMART_TABS" value="true" />
