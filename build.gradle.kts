@@ -622,6 +622,15 @@ publishing {
 					password = env.GITHUB_TOKEN.value
 				}
 			}
+		} else if (System.getenv("GITHUB_ACTOR") != null && System.getenv("GITHUB_TOKEN") != null) {
+			maven {
+				name = "GitHubPackages"
+				url = uri(scmUrl.replace("github.com", "maven.pkg.github.com"))
+				credentials {
+					username = System.getenv("GITHUB_ACTOR")
+					password = System.getenv("GITHUB_TOKEN")
+				}
+			}
 		}
 	}
 }
