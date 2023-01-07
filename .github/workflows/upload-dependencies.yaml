@@ -1,0 +1,25 @@
+name: Upload dependencies
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Run every monday at 12:00 UTC
+    - cron: 0 12 * * 1
+
+jobs:
+  upload:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Upload dependencies
+        uses: mikepenz/gradle-dependency-submission@{latest}
