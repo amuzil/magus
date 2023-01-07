@@ -49,9 +49,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Gradle
-        uses: gradle/gradle-build-action@v2
-
       - name: Cache Sonar
         uses: actions/cache@v3
         with:
@@ -61,11 +58,24 @@ jobs:
           restore-keys: |
             cache-${{ runner.os }}-sonar
 
+      - name: Cache ForgeGradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            build/fg_cache
+          key: cache-${{ runner.os }}-forgegradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'buildSrc/**/Versions.kt', 'buildSrc/**/Dependencies.kt', 'gradle/*.versions.toml') }}
+          restore-keys: |
+            cache-${{ runner.os }}-forgegradle-
+
       - name: Build with Gradle
-        run: ./gradlew build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
 
       - name: Perform Detekt analysis
-        run: ./gradlew detekt
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: detekt
 
       - name: Upload Detekt SARIF report
         uses: github/codeql-action/upload-sarif@v2
@@ -74,7 +84,9 @@ jobs:
           sarif_file: build/reports/detekt/detekt.sarif
 
       - name: Perform Sonar analysis
-        run: ./gradlew lint --info
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: sonar --info
         env:
           # Needed to get PR information
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
