@@ -261,7 +261,11 @@ detekt {
 	config = files(".detekt.yaml")
 }
 
-tasks.withType<Detekt> { reports { xml.required.set(true) } }
+tasks.withType<Detekt> {
+	basePath = rootProject.projectDir.absolutePath
+
+	reports { xml.required.set(true) }
+}
 
 sonarqube {
 	properties {
