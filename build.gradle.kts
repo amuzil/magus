@@ -7,9 +7,11 @@ import cc.ekblad.toml.decode
 import cc.ekblad.toml.model.TomlValue
 import cc.ekblad.toml.tomlMapper
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.gitlab.arturbosch.detekt.Detekt
 import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import kotlinx.kover.api.KoverPaths
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -144,6 +146,9 @@ plugins {
 	id("co.uzzu.dotenv.gradle")
 	id("org.barfuin.gradle.taskinfo")
 	// code quality
+	pmd
+	id("io.gitlab.arturbosch.detekt")
+	id("org.jetbrains.kotlinx.kover")
 	id("org.sonarqube")
 	id("com.diffplug.spotless")
 	// documentation
@@ -169,12 +174,12 @@ version = "${minecraftVersion}-${modConfig.version}"
 repositories {}
 
 dependencies {
-	minecraft("net.minecraftforge", "forge", "${minecraftVersion}-${forgeVersion}")
-
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib-jdk7", kotlinVersion)
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib-common", kotlinVersion)
+
+	minecraft("net.minecraftforge", "forge", "${minecraftVersion}-${forgeVersion}")
 
 	annotationProcessor(
 		"org.spongepowered",
@@ -250,6 +255,14 @@ tasks.build {
 
 /* CODE QUALITY */
 
+detekt {
+	parallel = true
+	buildUponDefaultConfig = true
+	config = files(".detekt.yaml")
+}
+
+tasks.withType<Detekt> { reports { xml.required.set(true) } }
+
 sonarqube {
 	properties {
 		property("sonar.projectKey", sonarProjectKey)
@@ -262,8 +275,43 @@ sonarqube {
 		property("sonar.sources", ".")
 		property("sonar.inclusions", "src/main/**/*, src/generated/**/*, *.kts")
 		property("sonar.coverage.exclusions", "*.gradle.kts")
+
+		// Other linters
+		property(
+			"sonar.java.pmd.reportPaths",
+			listOf(
+					tasks.pmdMain,
+					tasks.pmdTest,
+				)
+				.joinToString(",") { it.get().reports.xml.outputLocation.get().asFile.path }
+		)
+		property("sonar.kotlin.detekt.reportPaths", tasks.detekt.get().reports.xml.outputLocation)
+		property(
+			"sonar.coverage.jacoco.xmlReportPaths",
+			"${buildDir}/${KoverPaths.PROJECT_XML_REPORT_DEFAULT_PATH}"
+		)
 	}
 }
+
+val lint by
+	tasks.registering(Task::class) {
+		group = "verification"
+		description =
+			"""
+			Runs all code quality checks. Requires the SONAR_TOKEN environment variable to be set.
+		"""
+				.trimIndent()
+
+		dependsOn(tasks.pmdMain)
+		dependsOn(tasks.pmdTest)
+		dependsOn(tasks.detekt)
+		dependsOn(tasks.koverReport)
+		dependsOn(tasks.sonar)
+
+		tasks.sonar
+			.get()
+			.mustRunAfter(tasks.pmdMain, tasks.pmdTest, tasks.detekt, tasks.koverReport)
+	}
 
 spotless {
 	// Load from file and replace placeholders
@@ -347,8 +395,8 @@ spotless {
 	}
 }
 
-val format =
-	tasks.create("format") {
+val format by
+	tasks.registering(Task::class) {
 		group = "verification"
 		description = "Runs the formatter on the project"
 

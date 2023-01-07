@@ -20,6 +20,8 @@ pluginManagement {
 	val dotenvVersion: String by settings
 	val taskinfoVersion: String by settings
 	// code quality
+	val detektVersion: String by settings
+	val koverVersion: String by settings
 	val sonarqubeVersion: String by settings
 	val spotlessVersion: String by settings
 	// documentation
@@ -37,6 +39,8 @@ pluginManagement {
 		id("org.barfuin.gradle.taskinfo") version taskinfoVersion
 		// publish
 		// code quality
+		id("io.gitlab.arturbosch.detekt") version detektVersion
+		id("org.jetbrains.kotlinx.kover") version koverVersion
 		id("org.sonarqube") version sonarqubeVersion
 		id("com.diffplug.spotless") version spotlessVersion
 		// documentation
