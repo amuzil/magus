@@ -1,4 +1,4 @@
-name: Sonar analysis
+name: Lint
 
 on:
   push:
@@ -41,8 +41,8 @@ jobs:
           restore-keys: |
             cache-${{ runner.os }}-sonar
 
-      - name: Perform Sonar analysis
-        run: ./gradlew sonar --info --no-daemon
+      - name: Perform analysis
+        run: ./gradlew lint --info --no-daemon
         env:
           # Needed to get PR information
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -279,13 +279,16 @@ sonarqube {
 		// Other linters
 		property(
 			"sonar.java.pmd.reportPaths",
-			listOf(
-					tasks.pmdMain,
-					tasks.pmdTest,
-				)
-				.joinToString(",") { it.get().reports.xml.outputLocation.get().asFile.path }
+			listOf(tasks.pmdMain, tasks.pmdTest).joinToString(",") {
+				it.get().reports.xml.outputLocation.get().asFile.path
+			}
 		)
-		property("sonar.kotlin.detekt.reportPaths", tasks.detekt.get().reports.xml.outputLocation)
+		property(
+			"sonar.kotlin.detekt.reportPaths",
+			listOf(tasks.detekt).joinToString(",") {
+				it.get().reports.xml.outputLocation.get().asFile.path
+			}
+		)
 		property(
 			"sonar.coverage.jacoco.xmlReportPaths",
 			"${buildDir}/${KoverPaths.PROJECT_XML_REPORT_DEFAULT_PATH}"
@@ -297,10 +300,7 @@ val lint by
 	tasks.registering(Task::class) {
 		group = "verification"
 		description =
-			"""
-			Runs all code quality checks. Requires the SONAR_TOKEN environment variable to be set.
-		"""
-				.trimIndent()
+			"Runs all code quality checks. Requires the SONAR_TOKEN environment variable to be set."
 
 		dependsOn(tasks.pmdMain)
 		dependsOn(tasks.pmdTest)
