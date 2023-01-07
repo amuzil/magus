@@ -1,0 +1,19 @@
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+  # Run every monday at 12:00 UTC
+  - cron: 0 12 * * 1
+
+jobs:
+  stale:
+    name: Stale
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+    - name: Mark stale
+      uses: actions/stale@v7
