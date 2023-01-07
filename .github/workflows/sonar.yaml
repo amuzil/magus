@@ -9,22 +9,27 @@ on:
       - opened
       - synchronize
       - reopened
-  workflow_dispatch:
+  schedule:
+    # Run every monday at 12:00 UTC
+    - cron: 0 12 * * 1
 
 jobs:
   analyze:
+    name: Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           # Shallow clones should be disabled for a better relevancy of analysis
           fetch-depth: 0
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
+
       - name: Cache Sonar
         uses: actions/cache@v3
         with:
@@ -33,6 +38,7 @@ jobs:
           key: cache-${{ runner.os }}-sonar
           restore-keys: |
             cache-${{ runner.os }}-sonar
+
       - name: Perform Sonar analysis
         run: ./gradlew sonar --info --no-daemon
         env:
