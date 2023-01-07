@@ -285,9 +285,7 @@ sonarqube {
 		)
 		property(
 			"sonar.kotlin.detekt.reportPaths",
-			listOf(tasks.detekt).joinToString(",") {
-				it.get().reports.xml.outputLocation.get().asFile.path
-			}
+			listOf(tasks.detekt).joinToString(",") { it.get().xmlReportFile.get().asFile.path }
 		)
 		property(
 			"sonar.coverage.jacoco.xmlReportPaths",
@@ -296,21 +294,20 @@ sonarqube {
 	}
 }
 
+tasks.sonar {
+	dependsOn(tasks.pmdMain)
+	dependsOn(tasks.pmdTest)
+	dependsOn(tasks.detekt)
+	dependsOn(tasks.koverXmlReport)
+}
+
 val lint by
 	tasks.registering(Task::class) {
 		group = "verification"
 		description =
 			"Runs all code quality checks. Requires the SONAR_TOKEN environment variable to be set."
 
-		dependsOn(tasks.pmdMain)
-		dependsOn(tasks.pmdTest)
-		dependsOn(tasks.detekt)
-		dependsOn(tasks.koverReport)
 		dependsOn(tasks.sonar)
-
-		tasks.sonar
-			.get()
-			.mustRunAfter(tasks.pmdMain, tasks.pmdTest, tasks.detekt, tasks.koverReport)
 	}
 
 spotless {
