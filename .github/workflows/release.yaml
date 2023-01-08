@@ -9,8 +9,6 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
 
     permissions:
       contents: read

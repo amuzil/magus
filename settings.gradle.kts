@@ -66,8 +66,14 @@ buildscript {
 	// publish
 
 	dependencies {
-		classpath("org.spongepowered", "mixingradle", mixinGradleVersion)
+		// languages
+		// build
 		classpath("cc.ekblad", "4koma", komaVersion)
+		// code quality
+		// documentation
+		// forge
+		classpath("org.spongepowered", "mixingradle", mixinGradleVersion)
+		// publish
 	}
 }
 

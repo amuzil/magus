@@ -238,20 +238,24 @@ tasks.withType<Jar> {
 	}
 }
 
-tasks.jar { finalizedBy("reobfJar") }
+tasks.jar {
+	archiveClassifier.set("thin")
+
+	// Unnecessary, everything we want is in jarJar
+	enabled = false
+}
 
 jarJar { enable() }
 
-tasks.jarJar { archiveClassifier.set("") }
+val reobfJarJar = reobf.create("jarJar")
 
-reobf.create("jarJar")
+tasks.jarJar {
+	archiveClassifier.set("")
 
-tasks.build {
-	dependsOn(tasks.jarJar)
-	dependsOn(tasks.kotlinSourcesJar)
-	dependsOn(dokkaJar)
-	dependsOn(javadocJar)
+	finalizedBy(reobfJarJar)
 }
+
+afterEvaluate { tasks.assemble { setDependsOn(listOf(tasks.jarJar)) } }
 
 /* CODE QUALITY */
 
@@ -455,6 +459,9 @@ val dokkaJar by
 		description = "Generates the documentation as Dokka HTML"
 
 		dependsOn(tasks.dokkaHtml)
+
+		onlyIf { !tasks.dokkaHtml.get().state.upToDate }
+
 		from(tasks.dokkaHtml.get().outputDirectory)
 
 		archiveClassifier.set("dokka")
@@ -466,9 +473,23 @@ val javadocJar by
 		description = "Generates the documentation as Javadoc HTML"
 
 		dependsOn(tasks.dokkaJavadoc)
+
+		onlyIf { !tasks.dokkaJavadoc.get().state.upToDate }
+
 		from(tasks.dokkaJavadoc.get().outputDirectory)
 
 		archiveClassifier.set("javadoc")
+	}
+
+val buildWithDocs by
+	tasks.registering(Task::class) {
+		group = "documentation"
+		description = "Builds the project and generates the documentation"
+
+		dependsOn(tasks.build)
+		dependsOn(tasks.kotlinSourcesJar)
+		dependsOn(dokkaJar)
+		dependsOn(javadocJar)
 	}
 
 /* FORGE */
@@ -570,7 +591,10 @@ mixin {
 
 /* PUBLISH */
 
-tasks.publish { dependsOn(changelog) }
+tasks.publish {
+	dependsOn(changelog)
+	dependsOn(buildWithDocs)
+}
 
 publishing {
 	publications {
