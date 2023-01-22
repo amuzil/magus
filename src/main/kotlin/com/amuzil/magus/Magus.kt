@@ -31,7 +31,7 @@ import net.minecraftforge.registries.RegistryObject
 @Mod(Magus.MOD_ID)
 class Magus {
 	companion object {
-		const val MOD_ID = "assets/magus"
+		const val MOD_ID = "magus"
 		private val LOGGER = LogUtils.getLogger()
 
 		internal val BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID)

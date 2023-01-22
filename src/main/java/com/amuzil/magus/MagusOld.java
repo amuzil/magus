@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 
 // @Mod(MagusOld.MODID)
 public class MagusOld {
-	public static final String MOD_ID = "assets/magus";
+	public static final String MOD_ID = "magus";
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
