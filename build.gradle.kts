@@ -118,6 +118,9 @@ val prettierPluginTomlVersion: String by project
 // documentation
 // forge
 val mixinProcessorVersion: String by project
+// dependencies
+val playerAnimatorVersion: String by project
+val bendyLibVersion: String by project
 // SonarQube settings
 val sonarProjectKey: String by project
 val sonarOrganization: String by project
@@ -171,7 +174,12 @@ version = "${minecraftVersion}-${modConfig.version}"
 
 /* DEPENDENCIES */
 
-repositories {}
+repositories {
+	maven {
+		name = "KosmX's maven"
+		url = uri("https://maven.kosmx.dev/")
+	}
+}
 
 dependencies {
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
@@ -180,6 +188,10 @@ dependencies {
 	jarJar("org.jetbrains.kotlin", "kotlin-stdlib-common", kotlinVersion)
 
 	minecraft("net.minecraftforge", "forge", "${minecraftVersion}-${forgeVersion}")
+	implementation(
+		fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${playerAnimatorVersion}")
+	)
+	runtimeOnly(fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${bendyLibVersion}"))
 
 	annotationProcessor(
 		"org.spongepowered",
@@ -507,7 +519,10 @@ minecraft {
 				mapOf(
 					"forge.logging.markers" to "SCAN,REGISTRIES,REGISTRYDUMP",
 					"forge.logging.console.level" to "debug",
-					"forge.enabledGameTestNamespaces" to modConfig.modId
+					"forge.enabledGameTestNamespaces" to modConfig.modId,
+					"mixin.env.remapRefMap" to "true",
+					"mixin.env.refMapRemappingFile" to
+						"${projectDir}/build/createSrgToMcp/output.srg"
 				)
 			)
 
@@ -521,7 +536,10 @@ minecraft {
 				mapOf(
 					"forge.logging.markers" to "SCAN,REGISTRIES,REGISTRYDUMP",
 					"forge.logging.console.level" to "debug",
-					"forge.enabledGameTestNamespaces" to modConfig.modId
+					"forge.enabledGameTestNamespaces" to modConfig.modId,
+					"mixin.env.remapRefMap" to "true",
+					"mixin.env.refMapRemappingFile" to
+						"${projectDir}/build/createSrgToMcp/output.srg"
 				)
 			)
 

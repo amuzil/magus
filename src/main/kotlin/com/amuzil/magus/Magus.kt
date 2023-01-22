@@ -7,7 +7,11 @@ package com.amuzil.magus
 
 import com.mojang.logging.LogUtils
 import net.minecraft.client.Minecraft
-import net.minecraft.world.item.*
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.world.item.CreativeModeTabs
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockBehaviour
@@ -27,7 +31,7 @@ import net.minecraftforge.registries.RegistryObject
 @Mod(Magus.MOD_ID)
 class Magus {
 	companion object {
-		const val MOD_ID = "magus"
+		const val MOD_ID = "assets/magus"
 		private val LOGGER = LogUtils.getLogger()
 
 		internal val BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID)
@@ -61,12 +65,14 @@ class Magus {
 	}
 
 	private fun onCommonSetup(event: FMLCommonSetupEvent) {
+		event.description()
 		LOGGER.info("HELLO from common setup")
 		LOGGER.info("DIRT BLOCK >> ${ForgeRegistries.BLOCKS.getKey(Blocks.DIRT)}")
 	}
 
 	@SubscribeEvent
 	fun onServerStarting(event: ServerStartingEvent) {
+		event.toString()
 		LOGGER.info("HELLO from server starting")
 	}
 
@@ -75,6 +81,7 @@ class Magus {
 		@JvmStatic
 		@SubscribeEvent
 		fun onClientSetup(event: FMLClientSetupEvent) {
+			event.description()
 			LOGGER.info("HELLO from client setup")
 			LOGGER.info("MINECRAFT NAME >> ${Minecraft.getInstance().user.name}")
 		}

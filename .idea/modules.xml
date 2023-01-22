@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/magus.iml" filepath="$PROJECT_DIR$/.idea/modules/magus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.amuzil.magus.magus.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.amuzil.magus.magus.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/magus.main.iml" filepath="$PROJECT_DIR$/.idea/modules/magus.main.iml" />
     </modules>
   </component>

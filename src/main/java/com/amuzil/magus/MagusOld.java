@@ -5,6 +5,7 @@
  */
 package com.amuzil.magus;
 
+import com.amuzil.magus.animation.PlayerAnimator;
 import com.mojang.logging.LogUtils;
 import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
@@ -22,6 +23,7 @@ import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -33,7 +35,7 @@ import org.slf4j.Logger;
 
 // @Mod(MagusOld.MODID)
 public class MagusOld {
-	public static final String MOD_ID = "magus";
+	public static final String MOD_ID = "assets/magus";
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
@@ -75,6 +77,10 @@ public class MagusOld {
 	public static class ClientModEvents {
 		@SubscribeEvent
 		public static void onClientSetup(FMLClientSetupEvent event) {
+			if (ModList.get().isLoaded("bendylib")) {
+				PlayerAnimator.BendylibInstalled = true;
+			}
+			PlayerAnimator.init();
 			LOGGER.info("HELLO from client setup");
 			LOGGER.info(
 					"MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());

@@ -28,6 +28,9 @@ pluginManagement {
 	// forge
 	val forgeGradleVersion: String by settings
 	val librarianVersion: String by settings
+	// dependencies
+	val playerAnimatorVersion: String by settings
+	val bendyLibVersion: String by settings
 	// publish
 
 	plugins {
